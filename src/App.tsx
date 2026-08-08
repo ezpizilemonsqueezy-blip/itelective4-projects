@@ -136,7 +136,7 @@ export function ProjectList() {
       </div>
 
       <div className="rounded-xl border border-dashed border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-900 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
-        Click a project card, then use the button above to reveal one compact detail summary.
+        Click a project cardnpm , then use the button above to reveal one compact detail summary.
       </div>
 
       {filteredProjects.length === 0 ? (

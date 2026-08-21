@@ -9,6 +9,9 @@ interface UserCardProps {
 }
 
 function UserCard({ user, onSelect, variant = "default" }: UserCardProps) {
+    const handleClick = (): void => {
+        onSelect(user);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         console.log("Search:", e.target.value);

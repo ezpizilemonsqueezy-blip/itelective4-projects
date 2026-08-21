@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, type PersistOptions } from "zustand/middleware";
 
 export interface AuthState {
   token: string | null;
@@ -6,8 +7,18 @@ export interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  token: null,
-  login: (token: string) => set({ token }),
-  logout: () => set({ token: null }),
-}));
+type AuthPersist = PersistOptions<AuthState>;
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      login: (token: string) => set({ token }),
+      logout: () => set({ token: null }),
+    }),
+    {
+      name: "campus-recovery-auth",
+      partialize: (state) => ({ token: state.token }),
+    } as AuthPersist
+  )
+);

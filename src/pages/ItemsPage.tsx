@@ -1,47 +1,25 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-
-interface LostItem {
-  id: string;
-  name: string;
-  category: "Electronics" | "Accessories" | "Documents" | "Personal";
-  status: "Recovered" | "Claimed" | "Awaiting Pickup";
-  location: string;
-}
-
-const MOCK_ITEMS: LostItem[] = [
-  {
-    id: "item-101",
-    name: "Black Water Bottle",
-    category: "Personal",
-    status: "Recovered",
-    location: "Main entrance desk",
-  },
-  {
-    id: "item-102",
-    name: "Silver USB-C Cable",
-    category: "Electronics",
-    status: "Awaiting Pickup",
-    location: "Library counter",
-  },
-  {
-    id: "item-103",
-    name: "Student ID",
-    category: "Documents",
-    status: "Claimed",
-    location: "Security office",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { getItems, type ItemRecord } from "../api/client";
+import { useUiStore } from "../store/uiStore";
 
 export default function ItemsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const location = useLocation();
+  const searchTerm = useUiStore((state) => state.searchTerm);
+  const setSearchTerm = useUiStore((state) => state.setSearchTerm);
+
+  const { data: items = [], isLoading, isError } = useQuery<ItemRecord[]>({
+    queryKey: ["items"],
+    queryFn: getItems,
+  });
 
   const filteredItems = useMemo(
     () =>
-      MOCK_ITEMS.filter((item) =>
+      items.filter((item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase())
       ),
-    [searchTerm]
+    [items, searchTerm]
   );
 
   return (
@@ -59,13 +37,21 @@ export default function ItemsPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredItems.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-slate-600 md:col-span-2 xl:col-span-3">
-            No matching items found.
-          </div>
-        ) : (
-          filteredItems.map((item) => (
+      <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600">
+        Current route: {location.pathname}
+      </div>
+
+      {isLoading ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600">Loading items…</div>
+      ) : isError ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700">Unable to load items.</div>
+      ) : filteredItems.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-slate-600">
+          No matching items found.
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredItems.map((item) => (
             <Link
               key={item.id}
               to={`/items/${item.id}`}
@@ -83,9 +69,9 @@ export default function ItemsPage() {
                 <p>Location: {item.location}</p>
               </div>
             </Link>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

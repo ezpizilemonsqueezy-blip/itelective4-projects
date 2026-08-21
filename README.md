@@ -1,35 +1,47 @@
-# Creative Studio Dashboard
+# Campus Recovery Desk
 
-A React + TypeScript + Vite application built as a creative project management dashboard. This project demonstrates modern React state management patterns, reusable hooks, and a clean UI for presenting project status and hidden detail views.
+A React + TypeScript + Vite lost-and-found application for managing recovered items, claims, and staff access. This version demonstrates the GT3 routing and auth pattern using a domain-specific app instead of reusing the class demo.
 
 ## Overview
 
-This dashboard displays a list of active projects with:
+This app lets staff:
 
-- current status labels
-- priority indicators
-- a hidden detail section that appears when the user toggles "Show details"
-- search filtering using an input field
+- browse recovered items
+- search for a specific item
+- view item detail pages via a parameterized route like `/items/:itemId`
+- review claim activity
+- log in and access protected profile content
+- navigate through a shared layout with a navbar and outlet
 
-The app is intentionally designed for classroom demonstration of React fundamentals, including `useState`, `useEffect`, `useRef`, and custom hooks.
+## Core Features
 
-## Key Features
+- React Router for page navigation and parameterized routes
+- Zustand auth store with `token`, `login`, and `logout`
+- Protected route guard that redirects unauthenticated users to `/login`
+- Shared `Layout` component with a nav and `Outlet`
+- Lost-and-found domain pages for Home, Items, Claims, and Profile
+- Fallback `*` route for unknown URLs
+- No TypeScript errors in the production build
 
-- `useState` for managing project data, loading state, search input, and detail visibility
-- `useEffect` to simulate loading mock data on component mount
-- `useRef` to automatically focus the search input after data loads
-- `useToggle` custom hook for compact boolean state toggling
-- `usePrevious` custom hook for tracking previous values across renders
-- Clean card-based UI with conditional detail rendering
-- Simple project search and visual status badges
+## Project Structure
 
-## Files and Structure
+- `src/App.tsx` — route table for the application
+- `src/components/Layout.tsx` — shared navigation and layout shell
+- `src/components/ProtectedRoute.tsx` — auth guard for protected pages
+- `src/store/authStore.ts` — Zustand auth state with typed interface
+- `src/pages/` — page-level screens for the lost-and-found app
+- `src/main.tsx` — app entry point with `BrowserRouter`
+- `src/index.css` — base styling and Tailwind setup
 
-- `src/App.tsx` — main dashboard UI and project list component
-- `src/hooks/useToggle.ts` — reusable `useToggle` hook with explicit return types
-- `src/hooks/usePrevious.ts` — reusable `usePrevious` hook that tracks previous state values
-- `src/index.css` — base styling for the app layout
-- `index.html` — Vite entry point
+## Main Routes
+
+- `/` — home/dashboard landing page
+- `/items` — list of recovered items
+- `/items/:itemId` — item detail page
+- `/claims` — claim verification and queue view
+- `/login` — login page
+- `/profile` — protected staff profile page
+- `*` — not found page
 
 ## Setup Instructions
 
@@ -37,36 +49,31 @@ The app is intentionally designed for classroom demonstration of React fundament
    ```bash
    npm install
    ```
-2. Run the development server:
+2. Start the development server:
    ```bash
    npm run dev
    ```
-3. Open the application in your browser using the local Vite URL.
+3. Open the Vite local URL in the browser.
 
-## How the app works
+## Git / Workflow Notes
 
-1. When the page loads, `ProjectList` starts with empty state and a loading indicator.
-2. A `useEffect` hook simulates fetching mock project data and then populates the project list.
-3. `useRef` keeps a reference to the search field and focuses it after loading completes.
-4. Users can type into the search field to filter projects by name.
-5. The "Show details" button toggles a hidden detail section for every card, revealing progress and status information.
+This project is developed on the branch:
 
-## Commit & Git Notes
+- `gt3-part1`
 
-This project repository has been reset to a fresh commit with a custom author identity and a final commit message set to:
+The branch was pushed to the remote for the pull request workflow. No tag was created for this stage.
 
-- `GT2 Part 2: useState, useEffect, useRef, custom hooks`
+## Build Verification
 
-## Recommended Improvements
+The project was verified with:
 
-To make this dashboard stronger, you can add:
+```bash
+npm run build
+```
 
-- a real API data source instead of mock data
-- click-to-select interactions for individual project cards
-- animations for detail reveal transitions
-- a mobile-first responsive design using Tailwind CSS or custom utility classes
+This completed successfully with zero TypeScript errors.
 
 ## Licensing
 
-This project is provided as a class assignment demo and is not currently licensed for distribution.
+This project is created for coursework and is not intended for public commercial distribution.
 

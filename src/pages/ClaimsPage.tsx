@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { claimSchema, type ClaimFormValues } from "@/schemas/claimSchema";
 import { createClaim, getClaims, type ClaimRecord } from "../api/client";
 
 export default function ClaimsPage() {
   const queryClient = useQueryClient();
-  const [claimantName, setClaimantName] = useState("");
-  const [email, setEmail] = useState("");
 
   const { data: claims = [], isLoading, isError } = useQuery<ClaimRecord[]>({
     queryKey: ["claims"],
@@ -19,16 +22,32 @@ export default function ClaimsPage() {
     },
   });
 
-  const handleSubmit = () => {
-    if (!claimantName.trim() || !email.trim()) {
-      return;
-    }
-
-    mutation.mutate({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ClaimFormValues>({
+    resolver: zodResolver(claimSchema),
+    defaultValues: {
+      claimantName: "",
+      email: "",
       itemId: "item-101",
-      claimantName,
-      email,
+    },
+  });
+
+  const onSubmit = (values: ClaimFormValues) => {
+    mutation.mutate({
+      itemId: values.itemId,
+      claimantName: values.claimantName,
+      email: values.email,
       status: "Pending",
+    });
+
+    reset({
+      claimantName: "",
+      email: "",
+      itemId: "item-101",
     });
   };
 
@@ -56,27 +75,31 @@ export default function ClaimsPage() {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="text-xl font-semibold text-slate-900">Submit a claim</h3>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <input
-            value={claimantName}
-            onChange={(event) => setClaimantName(event.target.value)}
-            placeholder="Claimant name"
-            className="rounded-xl border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-          />
-          <input
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Email"
-            className="rounded-xl border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-          />
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="rounded-xl bg-amber-500 px-4 py-2 font-medium text-white transition hover:bg-amber-400"
-          >
-            {mutation.isPending ? "Submitting..." : "Submit claim"}
-          </button>
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-4 grid gap-4 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="claimantName">Claimant name</Label>
+            <Input id="claimantName" placeholder="Claimant name" {...register("claimantName")} />
+            {errors.claimantName ? <p className="text-sm text-rose-600">{errors.claimantName.message}</p> : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" placeholder="Email" {...register("email")} />
+            {errors.email ? <p className="text-sm text-rose-600">{errors.email.message}</p> : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="itemId">Item id</Label>
+            <Input id="itemId" placeholder="Item id" {...register("itemId")} />
+            {errors.itemId ? <p className="text-sm text-rose-600">{errors.itemId.message}</p> : null}
+          </div>
+
+          <div className="md:col-span-3 flex justify-end">
+            <Button type="submit" variant="default" disabled={mutation.isPending}>
+              {mutation.isPending ? "Submitting..." : "Submit claim"}
+            </Button>
+          </div>
+        </form>
       </div>
 
       {isLoading ? (

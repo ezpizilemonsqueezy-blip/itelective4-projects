@@ -1,12 +1,40 @@
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuthStore } from "../store/authStore";
+
+const loginSchema = z.object({
+  email: z.string().trim().email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.email.toLowerCase() !== data.password.toLowerCase(), {
+  message: "Password must not match your email",
+  path: ["password"],
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = () => {
     login("demo-token-123");
     navigate("/profile", { replace: true });
   };
@@ -22,13 +50,21 @@ export default function LoginPage() {
         <p className="mt-2 break-all">Token: {token ?? "No token yet"}</p>
       </div>
 
-      <button
-        type="button"
-        onClick={handleLogin}
-        className="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white transition hover:bg-indigo-500"
-      >
-        Login with demo token
-      </button>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+          {errors.email ? <p className="text-sm text-rose-600">{errors.email.message}</p> : null}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" type="password" placeholder="Enter password" {...register("password")} />
+          {errors.password ? <p className="text-sm text-rose-600">{errors.password.message}</p> : null}
+        </div>
+
+        <Button type="submit" className="w-full">Login with demo token</Button>
+      </form>
     </section>
   );
 }

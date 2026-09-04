@@ -68,3 +68,10 @@ export async function createClaim(input: ClaimCreateInput): Promise<ClaimRecord>
     }),
   });
 }
+
+export async function updateClaim(claimId: string, status: ClaimStatus): Promise<ClaimRecord> {
+  return request<ClaimRecord>(`/claims/${claimId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}

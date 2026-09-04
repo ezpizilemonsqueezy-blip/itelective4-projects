@@ -34,7 +34,7 @@
       "itemId": "item-101",
       "claimantName": "Anna Reyes",
       "email": "anna.reyes@example.com",
-      "status": "Pending",
+      "status": "Approved",
       "createdAt": "2026-08-21T10:00:00.000Z"
     },
     {
@@ -44,6 +44,15 @@
       "email": "miguel.tan@example.com",
       "status": "Approved",
       "createdAt": "2026-08-20T14:30:00.000Z"
+    },
+    {
+      "itemId": "item-101",
+      "claimantName": "Marc",
+      "email": "marc_lawrence_delapena@dlsl.edu.ph",
+      "status": "Pending",
+      "id": "y0V3HZhsXJE",
+      "createdAt": "2026-09-03T16:31:47.590Z"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

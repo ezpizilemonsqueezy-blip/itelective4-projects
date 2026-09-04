@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { claimSchema, type ClaimFormValues } from "@/schemas/claimSchema";
-import { createClaim, getClaims, type ClaimRecord } from "../api/client";
+import { createClaim, getClaims, updateClaim, type ClaimRecord } from "../api/client";
+import { useAuthStore } from "../store/authStore";
 
 export default function ClaimsPage() {
   const queryClient = useQueryClient();
+  const token = useAuthStore((state) => state.token);
 
   const { data: claims = [], isLoading, isError } = useQuery<ClaimRecord[]>({
     queryKey: ["claims"],
@@ -17,6 +19,14 @@ export default function ClaimsPage() {
 
   const mutation = useMutation({
     mutationFn: createClaim,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["claims"] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ claimId, status }: { claimId: string; status: "Approved" | "Rejected" }) =>
+      updateClaim(claimId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["claims"] });
     },
@@ -111,12 +121,38 @@ export default function ClaimsPage() {
           {claims.map((claim) => (
             <div key={claim.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-semibold text-slate-900">{claim.claimantName}</p>
+                <div className="flex-1">
+                  <p className="font-semibold text-slate-900">{claim.claimantName}</p>
+                  <p className="mt-1 text-sm text-slate-600">{claim.email}</p>
+                  <p className="mt-1 text-xs text-slate-500">Item: {claim.itemId}</p>
+                </div>
                 <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
                   {claim.status}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-slate-600">{claim.email}</p>
+
+              {claim.status === "Pending" && token && (
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => updateMutation.mutate({ claimId: claim.id, status: "Approved" })}
+                    disabled={updateMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    ✓ Approve
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => updateMutation.mutate({ claimId: claim.id, status: "Rejected" })}
+                    disabled={updateMutation.isPending}
+                    className="bg-rose-600 hover:bg-rose-700"
+                  >
+                    ✗ Reject
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
         </div>
